@@ -19,7 +19,10 @@
   .fig-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1.2rem 0; }
   .fig-row figure { flex: 1; min-width: 260px; margin: 0; }
   .fig-row img { width: 100%; }
+  figure.wide { width: 100vw; max-width: 980px; margin: 1.5rem calc(50% - 50vw); }
+  figure.wide img { width: 100%; display: block; }
   figcaption { font-family: system-ui, sans-serif; font-size: .78rem; color: #777; margin-top: .4rem; }
+  figure.wide figcaption { max-width: 680px; margin-left: auto; margin-right: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .88rem; margin: 1rem 0; font-family: system-ui, sans-serif; }
   td, th { padding: .4rem .7rem; border-bottom: 1px solid #eee; text-align: left; }
   th { font-weight: 600; color: #555; }
@@ -78,21 +81,20 @@ tstat, pval = stats.ttest_ind(expr[fib_cols].values, expr[ctrl_cols].values, axi
 </div>
 
 <h2>Results</h2>
-<div class="fig-row">
-  <figure>
-    <img src="pca.svg" alt="PCA of the 4 GSE71083 samples">
-    <figcaption>PCA across all annotated probes. The two unstimulated replicates and two
-    fibrin-stimulated replicates separate along PC1, suggesting fibrin treatment is the dominant
-    source of variance in this small dataset.</figcaption>
-  </figure>
-  <figure>
-    <img src="volcano.svg" alt="Volcano plot of fibrin vs unstimulated microglia">
-    <figcaption>log2FC vs. -log10(p) for ~14,000 annotated genes. Labeled points are canonical
-    innate-immune / pro-inflammatory genes. A handful of probes had near-zero within-group variance
-    by chance (an artifact of n=2 per group) and produced implausibly tiny p-values; these are floored
-    at -log10(p)=8 for display rather than left to dominate the plot.</figcaption>
-  </figure>
-</div>
+<figure>
+  <img src="pca.svg" alt="PCA of the 4 GSE71083 samples">
+  <figcaption>PCA across all annotated probes. The two unstimulated replicates and two
+  fibrin-stimulated replicates separate along PC1, suggesting fibrin treatment is the dominant
+  source of variance in this small dataset.</figcaption>
+</figure>
+
+<figure class="wide">
+  <img src="volcano.svg" alt="Volcano plot of fibrin vs unstimulated microglia">
+  <figcaption>log2FC vs. -log10(p) for ~14,000 annotated genes. Labeled points are canonical
+  innate-immune / pro-inflammatory genes. A handful of probes had near-zero within-group variance
+  by chance (an artifact of n=2 per group) and produced implausibly tiny p-values; these are floored
+  at -log10(p)=8 for display rather than left to dominate the plot.</figcaption>
+</figure>
 
 <p>
 The genes that come up as upregulated with fibrin stimulation are consistent with the lab's published
