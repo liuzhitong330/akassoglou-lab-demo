@@ -43,12 +43,15 @@ plt.close(fig)
 
 # --- Volcano ---
 res = pd.read_csv("de_results.csv")
-res["neglog10p"] = -np.log10(res["pvalue"].clip(lower=1e-300))
+# With n=2 per group, a handful of probes have near-zero within-group variance by
+# chance, producing artifactually tiny p-values (numerical artifacts, not real
+# significance). Floor p-values for display so the plot isn't dominated by these.
+res["neglog10p"] = -np.log10(res["pvalue"].clip(lower=1e-8))
 
 candidates = ["Il6", "Tnf", "Il1b", "Ccl2", "Cxcl10", "Nos2", "Ptgs2", "Il1a",
               "Ccl5", "Cxcl1", "Itgam", "Nfkb1", "Tlr4", "C3"]
 
-fig, ax = plt.subplots(figsize=(9, 7.5))
+fig, ax = plt.subplots(figsize=(11, 7.5))
 sig_up = (res.log2FC > 1) & (res.pvalue < 0.05)
 sig_dn = (res.log2FC < -1) & (res.pvalue < 0.05)
 ns = ~(sig_up | sig_dn)
@@ -59,20 +62,24 @@ ax.scatter(res.log2FC[sig_up], res.neglog10p[sig_up], s=16, color="#c03030", alp
 ax.scatter(res.log2FC[sig_dn], res.neglog10p[sig_dn], s=16, color="#2255aa", alpha=0.75, linewidth=0, label="Down in fibrin", rasterized=True)
 
 lab = res[res.gene_symbol.isin(candidates)].copy()
-lab = lab.sort_values("log2FC")
-# spread labels vertically so they don't overlap each other or the points
-used_y = []
-for _, row in lab.iterrows():
+lab = lab.sort_values("neglog10p", ascending=False).reset_index(drop=True)
+# stack labels in a column on the right side of the plot, each pointing back
+# to its real data point with a leader line -- avoids any label-on-label
+# or label-on-point overlap regardless of how clustered the points are
+x_text = res.log2FC.max() + 1.6
+y_top = res.neglog10p.max() + 0.6
+row_spacing = (y_top - 0.5) / max(len(lab) - 1, 1) if len(lab) > 1 else 0
+for i, row in lab.iterrows():
     x, y = row.log2FC, row.neglog10p
-    ty = y
-    while any(abs(ty - uy) < 0.35 for uy in used_y):
-        ty += 0.35
-    used_y.append(ty)
+    ty = y_top - i * row_spacing
     ax.scatter([x], [y], s=55, color="black", zorder=4, edgecolor="white", linewidth=0.6)
-    ax.annotate(row.gene_symbol, (x, y), xytext=(x + 0.15, ty),
+    ax.annotate(row.gene_symbol, (x, y), xytext=(x_text, ty),
                 fontsize=13, fontweight="bold", color="#111", zorder=5,
-                arrowprops=dict(arrowstyle="-", color="#999", linewidth=0.7, shrinkA=0, shrinkB=4),
-                bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85))
+                ha="left", va="center",
+                arrowprops=dict(arrowstyle="-", color="#999", linewidth=0.7, shrinkA=2, shrinkB=4),
+                bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="#ddd", alpha=0.95))
+ax.set_xlim(res.log2FC.min() - 0.5, x_text + 1.5)
+ax.set_ylim(-0.3, y_top + 0.5)
 
 ax.axvline(0, color="#ddd", linewidth=0.8)
 ax.set_xlabel("log2 fold change (fibrin vs. unstimulated)", fontsize=13)
