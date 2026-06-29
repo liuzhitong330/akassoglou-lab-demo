@@ -88,7 +88,9 @@ tstat, pval = stats.ttest_ind(expr[fib_cols].values, expr[ctrl_cols].values, axi
   <figure>
     <img src="volcano.svg" alt="Volcano plot of fibrin vs unstimulated microglia">
     <figcaption>log2FC vs. -log10(p) for ~14,000 annotated genes. Labeled points are canonical
-    innate-immune / pro-inflammatory genes.</figcaption>
+    innate-immune / pro-inflammatory genes. A handful of probes had near-zero within-group variance
+    by chance (an artifact of n=2 per group) and produced implausibly tiny p-values; these are floored
+    at -log10(p)=8 for display rather than left to dominate the plot.</figcaption>
   </figure>
 </div>
 
